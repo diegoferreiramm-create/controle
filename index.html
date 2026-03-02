@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Carteiras</title>
+<style>
+/* Mantive todo o seu CSS original conforme solicitado */
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#0f172a;
+  color:white;
+  min-height:100vh;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  box-sizing: border-box;
+}
+.box{
+  background:#1e293b;
+  padding:30px;
+  border-radius:12px;
+  width:380px; 
+  text-align:center;
+  box-shadow:0 0 20px rgba(0,0,0,.4);
+}
+h2{ margin-top:0; }
+input, select{
+  width:94%;
+  padding:10px;
+  margin:8px 0;
+  border:1px solid #334155;
+  border-radius:6px;
+  outline:none;
+  font-size:14px;
+  background:#1e293b;
+  color:white;
+}
+input:disabled, select:disabled {
+  background: #334155;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+.filtros-lista input, .filtros-lista select {
+  background: #1e293b !important;
+  color: white !important;
+  border: 1px solid #334155 !important;
+  height: 40px;
+}
+.via-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #0f172a;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #334155;
+}
+.via-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.via-option input {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+button{
+  background:#22c55e;
+  border:none;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+  color:white;
+  font-weight:bold;
+  margin-top:10px;
+  width:100%;
+}
+button:hover{ background:#16a34a; }
+.sec{ background:#64748b; }
+.cancel{ background:#ef4444; }
+#msg{ color:#f87171; min-height:20px; margin-top:10px; font-size:13px; }
+
+.res-card {
+  background: #0f172a;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: left;
+  border-left: 4px solid #22c55e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.res-card b { color: #22c55e; }
+#resultadoPesquisa {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 15px;
+}
+#modalSenha{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,.7);
+  align-items:center;
+  justify-content:center;
+  overflow:auto;
+  padding:20px;
+}
+#modalSenha > div{
+  background:#1e293b;
+  padding:25px;
+  border-radius:12px;
+  width:330px;
+  text-align:center;
+}
+#loginBox, #cadastrarBox, #entregarBox, #pesquisarBox, #corrigirBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 80vh; 
+  margin: auto 0;
+  padding: 20px 0;
+  box-sizing: border-box;
+}
+#menuBox{
+  display:none;
+  flex-direction:column;
+  width:100%;
+  min-height:100vh;
+}
+.container{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:25px; padding:40px; }
+.card{ background:#1e293b; padding:35px 20px; border-radius:14px; text-align:center; cursor:pointer; transition:.2s; font-size:18px; font-weight:bold; }
+.card:hover{ transform:scale(1.05); background:#334155; }
+
+#hudUsuario{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  background:#020617;
+  padding:12px 18px;
+  border-radius:14px;
+  display:none;
+  flex-direction: column; 
+  align-items: flex-end;
+  gap:8px;
+  box-shadow:0 0 15px rgba(0,0,0,.6);
+  z-index:9999;
+  border: 1px solid #1e293b;
+}
+#infoUsuario{ font-size:13px; color:#cbd5e1; text-align: right; }
+#dataHoraHud { font-size: 12px; color: #22c55e; font-weight: bold; font-family: monospace; }
+#hudUsuario .btns-hud { display: flex; gap: 10px; }
+#hudUsuario button{ background:#ef4444; border:none; padding:6px 12px; border-radius:8px; color:white; cursor:pointer; width:auto; font-size: 11px; }
+
+#msgCPF.valid{ color:#22c55e; }
+#msgCPF.invalid{ color:#f87171; }
+
+.area-terceiro {
+  border: 1px dashed #64748b;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+#infoAlunoEntrega {
+  background: #0f172a;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  text-align: left;
+  font-size: 13px;
+  border-left: 4px solid #22c55e;
+  display: none; 
+}
+
+#listasBox {
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  width: 98%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tabela-container {
+  background: #1e293b;
+  width: 100%;
+  border-radius: 12px;
+  padding: 0;
+  overflow-y: scroll; 
+  overflow-x: auto; 
+  max-height: 60vh; 
+  border: 1px solid #334155;
+}
+
+.tabela-container::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+.tabela-container::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 10px;
+}
+.tabela-container::-webkit-scrollbar-thumb {
+  background: #22c55e;
+  border-radius: 10px;
+  border: 2px solid #0f172a;
+}
+
+#tabelaListas {
+  width: 100%;
+  border-collapse: separate; 
+  border-spacing: 0;
+  color: #f1f5f9;
+  min-width: 1200px; 
+}
+
+#tabelaListas th, #tabelaListas td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap; 
+}
+
+#tabelaListas thead th {
+  position: sticky;
+  top: 0;
+  background: #0f172a;
+  color: #22c55e;
+  z-index: 10;
+  box-shadow: inset 0 -1px 0 #334155;
+}
+
+.filtros-lista {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+#contadorLinhas {
+  font-weight: bold;
+  color: #22c55e;
+  font-size: 14px;
+  background: #0f172a;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+@media print {
+  body * { visibility: hidden; }
+  #areaImpressao, #areaImpressao *, #contadorLinhas, #contadorLinhas * { visibility: visible; }
+  #areaImpressao { position: absolute; left: 0; top: 0; width: 100%; color: black !important; }
+  #contadorLinhas { border: none !important; color: black !important; padding: 5px 0 !important; }
+  table { border: 1px solid black; }
+  th, td { border: 1px solid black; padding: 5px; color: black !important; }
+}
+
+@media print {
+  body * { visibility: hidden; }
+  #logBox, #logBox * { visibility: visible; }
+  #logBox { position: absolute; left: 0; top: 0; width: 100%; }
+  button { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTT6vZYmU4Dnc-6YI9XJM1-p19mv6TcPXj56dhI8tBVQrNBIBa7PAnR7S4mbPDnmyiTQ/exec";
+</script>
+
+<div id="hudUsuario">
+  <div id="dataHoraHud">00/00/0000 00:00:00</div>
+  <div id="infoUsuario"></div>
+  <div class="btns-hud">
+    <button onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div id="loginBox">
+  <div class="box">
+    <h2>Sistema Carteiras</h2>
+    <input id="login" placeholder="Usuário">
+    <input id="senha" type="password" placeholder="Senha">
+    <button onclick="entrar()">Entrar</button>
+    <button class="sec" onclick="abrirSenha()">Trocar Senha</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<div id="menuBox" style="display:none;">
+  <div class="container">
+    <div class="card" onclick="abrirTela('cadastrarBox')">Cadastrar</div>
+    <div class="card" onclick="abrirTela('pesquisarBox')">Pesquisar</div>
+    <div class="card" onclick="abrirTela('entregarBox')">Entregar</div>
+    <div class="card" onclick="abrirTela('listasBox')">Listas</div>
+  </div> 
+  <div style="position: absolute; left: 30px; bottom: 30px;">
+    <button onclick="abrirAdmin()" style="
+      width: auto; 
+      background: #8b5cf6; 
+      color: white; 
+      font-size: 13px; 
+      padding: 10px 25px; 
+      border: none; 
+      border-radius: 50px; 
+      font-weight: bold; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;">
+      <span style="font-size: 15px;">⚙️</span> ÁREA ADMIN
+    </button>
+  </div> 
+</div>
+
+<div id="cadastrarBox" style="display:none;">
+  <div class="box">
+    <h2>Cadastro de Carteira</h2>
+    <input id="cpf" placeholder="CPF (xxx.xxx.xxx-xx)" maxlength="14">
+    <div id="msgCPF"></div>
+    <input id="nome" placeholder="Nome completo">
+    <input id="nascimento" type="tel" placeholder="Data de Nascimento (dd/mm/aaaa)" maxlength="10" oninput="mascaraData(this)">
+    <input id="municipio" placeholder="Município">
+    <input id="telefone" placeholder="Telefone (xx) xxxxx-xxxx">
+    
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="via" id="via1" value="1ª" checked> 1ª Via
+      </label>
+      <label class="via-option">
+        <input type="radio" name="via" id="via2" value="2ª"> 2ª Via
+      </label>
+    </div>
+
+    <input id="codigoBoleto" placeholder="Código do boleto (OBRIGATÓRIO)">
+    <button id="btnSalvar" onclick="salvarCadastro()">Salvar e Gerar Protocolo</button>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    <div id="msgCadastro"></div>
+  </div>
+</div>
+
+<div id="corrigirBox" style="display:none;">
+  <div class="box">
+    <h2 style="color: #eab308;">Corrigir / Editar Registro</h2>
+    
+    <div style="background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eab308; display: flex; gap: 5px;">
+      <input type="text" id="buscaCorrecao" placeholder="ID ou CPF para buscar" style="margin:0; flex-grow:1;">
+      <button onclick="buscarParaCorrigir()" style="background:#eab308; color:black; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; margin:0; width: auto; font-weight:bold;">BUSCAR</button>
+    </div>
+
+    <input id="edit_cpf" placeholder="CPF (xxx.xxx.xxx-xx)" maxlength="14">
+    <input id="edit_nome" placeholder="Nome completo">
+    <input id="edit_nascimento" type="text" placeholder="Data (dd/mm/aaaa)" maxlength="10" oninput="mascaraData(this)">
+    <input id="edit_municipio" placeholder="Município">
+    <input id="edit_telefone" placeholder="Telefone (xx) xxxxx-xxxx">
+    
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="edit_via" id="edit_via1" value="1ª" checked> 1ª Via
+      </label>
+      <label class="via-option">
+        <input type="radio" name="edit_via" id="edit_via2" value="2ª"> 2ª Via
+      </label>
+    </div>
+
+    <input id="edit_codigoBoleto" placeholder="Código do boleto">
+    
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+       <button id="btnSalvarCorrecao" onclick="salvarCadastro()" style="display:none;">Salvar</button> 
+       <button onclick="executarEdicao()" style="background: #eab308; color: black; font-weight: bold;">EDITAR / CORRIGIR</button>
+       <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    </div>
+    
+    <div id="msgCorrecao"></div>
+  </div>
+</div>
+
+<div id="entregarBox" style="display:none;">
+  <div class="box">
+    <h2>Registrar Entrega</h2>
+    <input id="codigoCtr" placeholder="Código CTR (Somente números)" inputmode="numeric">
+    
+    <div id="infoAlunoEntrega">
+      <b>Aluno:</b> <span id="resNomeAluno">...</span><br>
+      <b>CPF:</b> <span id="resCpfAluno">...</span>
+    </div>
+
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="viaEntrega" id="via1" value="1" checked> 1ª VIA
+      </label>
+      <label class="via-option">
+        <input type="radio" name="viaEntrega" id="via2" value="2"> 2ª VIA
+      </label>
+    </div>
+
+    <div style="margin:15px 0; text-align: left; font-size: 14px; background: #0f172a; padding: 10px; border-radius: 8px;">
+      <label><input type="checkbox" id="checkTerceiro" onchange="toggleTerceiro()"> Entregar para Terceiro?</label>
+    </div>
+
+    <div id="camposTerceiro" class="area-terceiro" style="opacity: 0.5;">
+      <input id="nomeTerceiro" placeholder="Nome Completo do Recebedor" disabled>
+      <input id="cpfTerceiro" placeholder="CPF do Recebedor" maxlength="14" disabled>
+      
+      <select id="parentesco" disabled>
+        <option value="">Vínculo / Parentesco</option>
+        <option value="Pai/Mãe">Pai/Mãe</option>
+        <option value="Irmãos/filhos">Irmãos/filhos</option>
+        <option value="Tios/primos/terceiros">Tios/primos/terceiros</option>
+      </select>
+    </div>
+
+    <button onclick="salvarEntrega()">Confirmar e Imprimir</button>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    <div id="msgEntrega" style="margin-top:10px; font-size:13px;"></div>
+  </div>
+</div>
+
+<div id="modalSenha">
+  <div>
+    <h3>Trocar Senha</h3>
+    <input id="usuarioTroca" placeholder="Usuário">
+    <input id="senhaAtual" type="password" placeholder="Senha atual">
+    <input id="novaSenha" type="password" placeholder="Nova senha">
+    <input id="confSenha" type="password" placeholder="Confirmar nova senha">
+    <button onclick="salvarSenha()">Salvar</button>
+    <button class="cancel" onclick="fecharSenha()">Cancelar</button>
+  </div>
+</div>
+
+<div id="pesquisarBox" style="display:none;">
+  <div class="box" style="width: 500px;">
+    <h2>Pesquisar Carteira</h2>
+    <input id="valorPesquisa" placeholder="Digite CPF ou Nome para buscar">
+    <div style="display:flex; gap:10px;">
+      <button onclick="executarBuscaGeral('cpf')">Buscar por CPF</button>
+      <button class="sec" onclick="executarBuscaGeral('nome')">Buscar por Nome</button>
+    </div>
+    <div id="resultadoPesquisa"></div>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+  </div>
+</div>
+
+<div id="listasBox" style="display:none; flex-direction:column; width:100%; align-items:center;">
+  <div class="box" style="width: 98%; max-width: 1400px; margin: 0 auto;">
+    
+    <h2>Relatório Geral de Cadastros</h2>
+    
+    <div class="filtros-lista" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #0f172a; padding: 15px; border-radius: 8px;">
+      
+      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px;">
+      
+      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 150px;">
+        <option value="">STATUS (TODOS)</option>
+        <option value="PENDENTE">PENDENTE</option>
+        <option value="APROVADO">APROVADO</option>
+        <option value="REPROVADO">REPROVADO</option>
+        <option value="ENTREGUE">ENTREGUE</option>
+      </select>
+
+      <div id="filtrosAdmin" style="display: none; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 110px;">
+        <input type="text" id="fMun" placeholder="MUNICÍPIO" onkeyup="filtrarTabelaAvancado()" style="width: 130px;">
+        <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 120px;">
+        
+        <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 100px;">
+          <option value="">VIA</option>
+          <option value="1ª">1ª Via</option>
+          <option value="2ª">2ª Via</option>
+        </select>
+
+        <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 80px;">
+        <input type="text" id="fData" placeholder="DATA" onkeyup="filtrarTabelaAvancado()" style="width: 120px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="logBox" style="display:none; flex-direction:column; width:100%; min-height:100vh; align-items:center; background:#0f172a; padding:20px;">
+  <div class="box" style="width: 98%; max-width: 1100px; background:#1e293b; border: 1px solid #334155;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f87171; padding-bottom:15px; margin-bottom:15px;">
+      <h2 style="color:#f87171; margin:0;">AUDITORIA DE LOGS</h2>
+      <div style="display:flex; gap:10px;">
+        <button onclick="window.print()" style="background:#3b82f6; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">IMPRIMIR</button>
+        <button onclick="abrirTela('menuBox')" style="background:#64748b; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">VOLTAR</button>
+      </div>
+    </div>
+    <div style="overflow-y:auto; max-height:70vh;">
+      <table style="width:100%; border-collapse:collapse; font-size:12px; color:white;">
+        <thead>
+          <tr style="background:#020617; color:#f87171; text-align:left;">
+            <th style="padding:12px; border:1px solid #334155;">DATA/HORA</th>
+            <th style="padding:12px; border:1px solid #334155;">USUÁRIO</th>
+            <th style="padding:12px; border:1px solid #334155;">AÇÃO</th>
+            <th style="padding:12px; border:1px solid #334155;">ID / CPF</th>
+          </tr>
+        </thead>
+        <tbody id="corpoLogs"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+  
+    
+
+
+<script>
+// --- VARIÁVEIS GLOBAIS DE CONTROLE ---
+let modoEdicao = false;
+let idSendoEditado = null;
+let alunoEncontradoGlobal = null;
+
+// FUNÇÃO AUXILIAR PARA CHAMADAS API (Substitui o google.script.run)
+async function chamarAPI(params) {
+  const query = new URLSearchParams(params).toString();
+  const res = await fetch(`${SCRIPT_URL}?${query}`);
+  return await res.json();
+}
+
+//atribuições de abrir paginas//
+function abrirTela(id){
+  const telas = ["loginBox","menuBox","cadastrarBox","pesquisarBox","entregarBox","listasBox", "logBox", "recebimentoLoteBox", "corrigirBox"];   
+  
+  telas.forEach(t => { 
+    const el = document.getElementById(t);
+    if(el) el.style.display = "none"; 
+  });
+
+  const telaDestino = document.getElementById(id);
+  if(telaDestino){
+    telaDestino.style.display = "flex";
+  }
+
+  // Reseta campos específicos ao navegar
+  if(id === 'entregarBox') {
+    document.getElementById("codigoCtr").value = "";
+    document.getElementById("infoAlunoEntrega").style.display = "none";
+    alunoEncontradoGlobal = null;
+  }
+  if(id === 'listasBox') carregarLista();
+  if(id === 'logBox') carregarDadosLog();
+  
+  if(id !== 'cadastrarBox') {
+    modoEdicao = false;
+    idSendoEditado = null;
+    const btnSalvar = document.getElementById("btnSalvar");
+    if(btnSalvar) btnSalvar.innerText = "Salvar e Gerar Protocolo";
+  }
+}
+
+//ATRIBUIÇÃO LOGIN//
+async function entrar(){
+  const login = document.getElementById("login").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+  const msg = document.getElementById("msg");
+  
+  try {
+    const res = await chamarAPI({ acao: "validarLogin", u: login, s: senha });
+    if(res.sucesso){
+      sessionStorage.setItem("usuario", JSON.stringify(res));
+      mostrarMenu();
+    } else { 
+      msg.innerText="Login inválido"; 
+    }
+  } catch (err) {
+    console.error("Erro no login:", err);
+    msg.innerText = "Erro de conexão com o servidor.";
+  }
+}
+
+/**
+ * MAPEAMENTO RÍGIDO - AJUSTADO
+ */
+const colunasDef = [
+  { label: "ID", idx: 1 }, { label: "CPF", idx: 2 }, { label: "NOME", idx: 3 },
+  { label: "NASC", idx: 4 }, { label: "MUNICIPIO", idx: 5 }, { label: "TEL", idx: 6 },
+  { label: "VIA", idx: 7 }, { label: "PARCEIRO", idx: 8 }, 
+  { label: "ATENDENTE", idx: 10 }, 
+  { label: "Nº BOLETO", idx: 11 }, 
+  { label: "STATUS", idx: 12 },    
+  { label: "MOTIVO", idx: 13 },    
+  { label: "DT ATU", idx: 14 },    
+  { label: "CARTEIRA", idx: 15 },  
+  { label: "LOTE", idx: 16 },      
+  { label: "EDITAR", idx: 17 }     
+];
+
+const colunasParaMarcar = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "ATENDENTE", "Nº BOLETO", "EDITAR"];
+
+function gerarChecksColunas() {
+  const container = document.getElementById("containerChecks");
+  if (!container) return;
+  container.innerHTML = ""; 
+
+  colunasDef.forEach((col) => {
+    const label = document.createElement("label");
+    label.style.cssText = "margin-right:10px; display:inline-flex; align-items:center; gap:5px; cursor:pointer; font-size:12px; white-space:nowrap;";
+    const marcado = colunasParaMarcar.includes(col.label) ? "checked" : "";
+
+    label.innerHTML = `<input type="checkbox" ${marcado} onchange="filtrarTabelaAvancado()" data-idx="${col.idx}"> ${col.label}`;
+    container.appendChild(label);
+  });
+  
+  setTimeout(filtrarTabelaAvancado, 200);
+}
+
+function filtrarTabelaAvancado() {
+  const sessao = sessionStorage.getItem("usuario");
+  if (!sessao) return;
+  const user = JSON.parse(sessao);
+  const isAdmin = (user.parceiro.toString() === "97");
+
+  const fNome = document.getElementById("fNome").value.toUpperCase();
+  const fStatus = document.getElementById("fStatus").value.toUpperCase();
+  const fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim() : "";
+ 
+  const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
+  const fMun = isAdmin ? document.getElementById("fMun").value.toUpperCase() : "";
+  const fAtend = isAdmin ? document.getElementById("fAtend").value.toUpperCase() : "";
+  const fVia = (isAdmin && document.getElementById("fVia")) ? document.getElementById("fVia").value.toUpperCase() : "";
+
+  const tabela = document.getElementById("tabelaListas");
+  const tr = tabela.getElementsByTagName("tr");
+  let contadorVisiveis = 0;
+
+  for (let i = 1; i < tr.length; i++) {
+    const td = tr[i].getElementsByTagName("td");
+    if (!td[0]) continue;
+
+    let mostrar = true;
+    if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
+    if (fStatus && td[11] && td[11].innerText.toUpperCase().trim() !== fStatus) mostrar = false;
+
+    let txtLote = td[16] ? td[16].innerText.trim() : "";
+    if (fLote && txtLote !== fLote) {
+        if (td[15] && td[15].innerText.trim() === fLote) {
+            mostrar = true; 
+        } else {
+            mostrar = false;
+        }
+    }
+   
+    if (isAdmin) {
+      if (fVia && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
+      if (fParc && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
+      if (fMun && td[4] && td[4].innerText.toUpperCase().indexOf(fMun) === -1) mostrar = false;
+      if (fAtend && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
+    }
+
+    tr[i].style.display = mostrar ? "" : "none";
+    if (mostrar) contadorVisiveis++;
+  }
+
+  const elNumLinhas = document.getElementById("numLinhas");
+  if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
+
+  const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
+  checks.forEach((input) => {
+    const idx = input.getAttribute('data-idx');
+    const visivel = input.checked;
+    const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
+    colunas.forEach(cel => {
+      cel.style.display = visivel ? "" : "none";
+    });
+  });
+}
+
+function imprimirLista() {
+  const conteudo = document.getElementById('areaImpressao').innerHTML;
+  const telaPrint = window.open('', '_blank');
+  
+  telaPrint.document.write(`
+    <html>
+    <head>
+      <title>Relatório</title>
+      <style>
+        @page { size: landscape; margin: 0.5cm; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 2px; font-size: 8px; }
+        [style*="display: none"] { display: none !important; }
+        th:last-child, td:last-child { display: none !important; }
+      </style>
+    </head>
+    <body>
+      ${conteudo}
+      <script>window.onload = function() { window.print(); window.close(); };<\/script>
+    </body>
+    </html>
+  `);
+  telaPrint.document.close();
+}
+
+window.onload = gerarChecksColunas;
+
+function atualizarRelogio() {
+  const agora = new Date();
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const ano = agora.getFullYear();
+  const horas = String(agora.getHours()).padStart(2, '0');
+  const minutos = String(agora.getMinutes()).padStart(2, '0');
+  const segundos = String(agora.getSeconds()).padStart(2, '0');
+  
+  const strDataHora = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
+  const el = document.getElementById("dataHoraHud");
+  if(el) el.innerText = strDataHora;
+}
+setInterval(atualizarRelogio, 1000);
+
+const CPF = {
+  limpar(valor){ return valor.replace(/\D/g,''); },
+  formatar(valor){
+    let v = this.limpar(valor);
+    v = v.slice(0,11);
+    v = v.replace(/(\d{3})(\d)/,'$1.$2');
+    v = v.replace(/(\d{3})(\d)/,'$1.$2');
+    v = v.replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+    return v;
+  },
+  validar(valor){
+    let cpf = this.limpar(valor);
+    if(cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    let soma=0, resto;
+    for(let i=1;i<=9;i++) soma+=parseInt(cpf.substring(i-1,i))*(11-i);
+    resto=(soma*10)%11; if(resto===10||resto===11) resto=0;
+    if(resto!=parseInt(cpf.substring(9,10))) return false;
+    soma=0;
+    for(let i=1;i<=10;i++) soma+=parseInt(cpf.substring(i-1,i))*(12-i);
+    resto=(soma*10)%11; if(resto===10||resto===11) resto=0;
+    return resto==parseInt(cpf.substring(10,11));
+  }
+};
+
+// Monitoramento do Blur para Busca de CPF
+document.addEventListener('blur', async function(e) {
+  if (e.target.id === 'cpf' && !modoEdicao) {
+    const valorCpf = e.target.value;
+    if (!CPF.validar(valorCpf)) return;
+    document.getElementById("msgCPF").innerText = "Consultando base de dados...";
+    
+    try {
+      const res = await chamarAPI({ acao: "buscarDadosNoBD", cpf: valorCpf });
+      if (res && res.encontrado) {
+        document.getElementById("msgCPF").innerText = "Dados recuperados!";
+        document.getElementById("nome").value = res.nome || "";
+        document.getElementById("municipio").value = res.municipio || "";
+        document.getElementById("telefone").value = res.telefone || "";
+        if (res.nascimento) {
+          try {
+            let dataStr = res.nascimento.toString();
+            let dataFinal = "";
+            if (dataStr.includes('/')) {
+              const p = dataStr.split('/');
+              dataFinal = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+            } else {
+              let d = new Date(res.nascimento);
+              if (!isNaN(d.getTime())) {
+                let ano = d.getFullYear();
+                let mes = String(d.getMonth() + 1).padStart(2, '0');
+                let dia = String(d.getDate()).padStart(2, '0');
+                dataFinal = `${ano}-${mes}-${dia}`;
+              }
+            }
+            if (dataFinal) document.getElementById("nascimento").value = dataFinal;
+          } catch(err) { console.error(err); }
+        }
+      } else {
+        document.getElementById("msgCPF").innerText = "CPF não encontrado (Novo cadastro).";
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById("msgCPF").innerText = "Erro ao consultar base.";
+    }
+  }
+}, true);
+
+
+function mostrarMenu(){
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  if(!user) return;
+  
+  document.getElementById("infoUsuario").innerText = user.nome + " | " + user.parceiro;
+  document.getElementById("hudUsuario").style.display="flex";
+
+  if(user.nome === 'admin' || user.parceiro.toString() === "97") {
+    const cardLog = document.getElementById("cardLog");
+    if(cardLog) cardLog.style.display = "block";
+  }
+
+  abrirTela('menuBox');
+}
+
+async function carregarDadosLog() {
+  const tbody = document.getElementById("corpoLogs");
+  if(!tbody) return;
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>Carregando Logs da Planilha...</td></tr>";
+
+  try {
+    const dados = await chamarAPI({ acao: "buscarLogsDaAbaLog" });
+    tbody.innerHTML = "";
+    if (!dados || dados.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>Aba LOG está vazia.</td></tr>";
+      return;
+    }
+    dados.forEach(l => {
+      tbody.innerHTML += `
+        <tr style="border-bottom: 1px solid #334155;">
+          <td style="padding:10px;">${l.data}</td>
+          <td>${l.usuario}</td>
+          <td style="color:#fbbf24;">${l.parceiro || '-'}</td>
+          <td>${l.acao}</td>
+          <td style="color:#22c55e;">${l.idRef}</td>
+        </tr>`;
+    });
+  } catch (err) {
+    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Erro ao carregar logs.</td></tr>";
+  }
+}
+
+function logout(){ sessionStorage.clear(); document.getElementById("hudUsuario").style.display="none"; abrirTela('loginBox'); }
+
+function toggleTerceiro() {
+  const isChecked = document.getElementById("checkTerceiro").checked;
+  const container = document.getElementById("camposTerceiro");
+  const inputs = container.querySelectorAll("input, select");
+  container.style.opacity = isChecked ? "1" : "0.5";
+  inputs.forEach(el => el.disabled = !isChecked);
+}
+
+function prepararEdicao(item) {
+  modoEdicao = true;
+  idSendoEditado = item.id;
+  
+  abrirTela('cadastrarBox');
+  
+  document.getElementById("cpf").value = item.cpf || "";
+  document.getElementById("nome").value = item.nome || "";
+  
+  if(item.nasc) {
+    const p = item.nasc.split('/');
+    if(p.length === 3) {
+      document.getElementById("nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
+    }
+  }
+  
+  document.getElementById("municipio").value = item.municipio || "";
+  document.getElementById("telefone").value = item.tel || "";
+  
+  const campoBoleto = document.getElementById("codigoBoleto");
+  if(campoBoleto) {
+     campoBoleto.value = item.boleto || "";
+  }
+  
+  document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
+}
+
+async function salvarCadastro(){
+  const userStr = sessionStorage.getItem("usuario");
+  if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
+  const user = JSON.parse(userStr);
+  const cpf = document.getElementById("cpf").value;
+  const nome = document.getElementById("nome").value;
+  const nascRaw = document.getElementById("nascimento").value;
+  const mun = document.getElementById("municipio").value;
+  const tel = document.getElementById("telefone").value;
+  
+  const viaEl = document.querySelector('input[name="via"]:checked');
+  const via = viaEl ? viaEl.value : "1ª VIA";
+  
+  const boleto = document.getElementById("codigoBoleto").value.trim();
+
+  if(!cpf || !nome || !nascRaw || !boleto) { 
+    alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
+    return; 
+  }
+
+  const partes = nascRaw.split("-");
+  const nascFormatado = `${partes[2]}/${partes[1]}/${partes[0]}`;
+  const btn = document.getElementById("btnSalvar");
+  btn.innerText = "Processando...";
+  btn.disabled = true;
+
+  try {
+    if (modoEdicao) {
+      const res = await chamarAPI({
+        acao: "editarCadastroAppsScript",
+        id: idSendoEditado,
+        cpf: cpf,
+        nome: nome,
+        nasc: nascFormatado,
+        mun: mun,
+        tel: tel,
+        via: via,
+        atendente: user.nome,
+        parceiro: user.parceiro,
+        boleto: boleto
+      });
+
+      if(res.sucesso) {
+        ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = "";
+        });
+        document.getElementById("msgCPF").innerText = "";
+        abrirTela('listasBox');
+      } else { alert("Erro ao editar: " + res.erro); }
+
+    } else {
+      const res = await chamarAPI({
+        acao: "salvarCadastroAppsScript",
+        cpf: cpf,
+        nome: nome,
+        nasc: nascFormatado,
+        mun: mun,
+        tel: tel,
+        via: via,
+        parceiro: user.parceiro,
+        atendente: user.nome,
+        boleto: boleto
+      });
+
+      if(res.sucesso){ 
+        imprimirProtocolo(res.id, cpf, nome, nascFormatado, mun, via, user.nome, user.parceiro, res.data, boleto);
+        ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = "";
+        });
+        document.getElementById("msgCPF").innerText = "";
+      } else { alert("Erro: " + res.erro); }
+    }
+  } catch (err) {
+    alert("Erro de conexão com o servidor.");
+  } finally {
+    btn.innerText = "Salvar e Gerar Protocolo";
+    btn.disabled = false;
+  }
+}
+
+function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
+  const telaPrint = window.open('', '_blank');
+  telaPrint.document.write(`
+    <html>
+    <head>
+      <title>Protocolo CTR - ${id}</title>
+      <style>
+        @page { size: A5 landscape; margin: 0; }
+        body { font-family: Arial, sans-serif; padding: 5mm; color: #000; }
+        .ticket { border: 2px solid #000; padding: 10px; width: 195mm; height: 135mm; display: flex; flex-direction: column; box-sizing: border-box; }
+        .header { text-align: center; border-bottom: 2px solid #000; margin-bottom: 10px; }
+        .id-destaque { font-size: 24px; font-weight: bold; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+        .lgpd { font-size: 9px; font-style: italic; margin-top: 10px; border-top: 1px solid #ccc; padding-top: 5px; text-align: justify; }
+        .rules { font-size: 10px; background: #f2f2f2; padding: 8px; border: 1px solid #000; margin-top: 8px; line-height: 1.3; }
+        .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-bottom: 5px; }
+        b { text-transform: uppercase; }
+      </style>
+    </head>
+    <body>
+      <div class="ticket">
+        <div class="header">
+          <h2 style="margin:5px 0;">PROTOCOLO DE SOLICITAÇÃO</h2>
+          <span class="id-destaque">Nº BOLETO: ${boleto}</span>
+        </div>
+        <div class="content">
+          <div class="row"><span><b>NOME:</b> ${nome.toUpperCase()}</span><span><b>DATA:</b> ${data.split(' ')[0]}</span></div>
+          <div class="row"><span><b>CPF:</b> ${cpf}</span><span><b>VIA:</b> ${via}</span></div>
+          <div class="row"><span><b>MUNICÍPIO:</b> ${municipio.toUpperCase()}</span><span><b>ATENDENTE:</b> ${atendente}</span></div>
+          
+          <div class="lgpd">
+            Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
+          </div>
+
+          <div class="rules">
+            <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
+            • Aluno, mãe, pai, irmãos ou filhos: Apresentar o comprovante de solicitação original e um documento oficial com foto.<br>
+            • (Em caso de perda ou extravio do comprovante, apresentar uma cópia do documento oficial com foto de quem for receber.)<br>
+            • Tios, primos, demais parentes ou terceiros: Apresentar o comprovante de solicitação original e um documento oficial com foto de quem estiver recebendo, juntamente com uma cópia do documento oficial do aluno.<br><br>
+            <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div style="border-top:1px solid #000; width:250px; text-align:center; font-size:12px; margin-top: 20px;">Assinatura do Requerente</div>
+          <div style="font-size:12px;">Via do Aluno / ${parceiro} / CTR: ${id}</div>
+        </div>
+      </div>
+      <script>window.print();<\/script>
+    </body>
+    </html>
+  `);
+  telaPrint.document.close();
+}
+
+
+<script>
+/**
+ * TERCEIRA PARTE: GESTÃO DE SENHAS, BUSCAS, LISTAGEM E ENTREGAS
+ */
+
+async function salvarSenha() {
+  const login = document.getElementById("usuarioTroca").value.trim();
+  const atual = document.getElementById("senhaAtual").value.trim();
+  const nova = document.getElementById("novaSenha").value.trim();
+  const conf = document.getElementById("confSenha").value.trim();
+  
+  if(nova !== conf) { alert("A nova senha não coincide!"); return; }
+  
+  try {
+    const res = await chamarAPI({ 
+      acao: "trocarSenha", 
+      login: login, 
+      atual: atual, 
+      nova: nova 
+    });
+    if(res.sucesso) { alert("Senha alterada!"); fecharSenha(); }
+    else { alert("Erro ao alterar senha."); }
+  } catch (err) {
+    alert("Erro de conexão ao alterar senha.");
+  }
+}
+
+async function executarBuscaGeral(tipo) {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const valor = document.getElementById("valorPesquisa").value;
+  if(!valor) return alert("Digite algo para pesquisar");
+  
+  const div = document.getElementById("resultadoPesquisa");
+  div.innerHTML = "Pesquisando...";
+  
+  try {
+    const res = await chamarAPI({ 
+      acao: "pesquisarNoCadastroGeral", 
+      valor: valor, 
+      tipo: tipo, 
+      parceiro: user.parceiro 
+    });
+    
+    div.innerHTML = "";
+    
+    if(!res || res.length === 0) {
+      div.innerHTML = "Nenhum registro encontrado ou sem permissão.";
+      return;
+    }
+    
+    res.forEach(item => {
+      let dStat = "";
+      for(let key in item) {
+        if(key.toUpperCase().replace(/\s/g,'') === "DATASTATUS") dStat = item[key];
+      }
+      if(!dStat) dStat = item.dataStatus || item.data_status || item["DATA STATUS"] || "";
+
+      div.innerHTML += `
+        <div class="res-card">
+          <b>NOME:</b> ${item.nome}<br>
+          <b>CPF:</b> ${item.cpf} | <b>VIA:</b> ${item.via}<br>
+          <b>MUNICÍPIO:</b> ${item.municipio} | <b>PARCEIRO:</b> ${item.parceiro}<br>
+          <b>CARTEIRA:</b> ${item.numCarteira || 'N/A'}<br>
+          <b>STATUS:</b> ${item.status || 'Pendente'} | <b>MOTIVO:</b> ${item.motivo || '-'}<br>
+          <b>DATA STATUS:</b> ${dStat}<br>
+          <b>ATENDENTE:</b> ${item.atendente}<br>
+          <small>Última Atualização: ${item.dataAtu}</small>
+        </div>
+      `;
+    });
+  } catch (err) {
+    div.innerHTML = "Erro ao processar pesquisa.";
+  }
+}
+
+document.addEventListener('input', function (e) {
+  const camposCpfObrigatorio = ['cpf', 'cpfTerceiro'];
+
+  if (camposCpfObrigatorio.includes(e.target.id)) {
+      e.target.value = CPF.formatar(e.target.value);
+  }
+  
+  if(e.target.id === 'cpf') {
+    const v = CPF.validar(e.target.value);
+    const msg = document.getElementById("msgCPF");
+    if(msg) {
+      msg.innerText = v ? "CPF Válido" : "CPF Inválido";
+      msg.className = v ? "valid" : "invalid";
+    }
+    const btnSalvar = document.getElementById("btnSalvar");
+    if(btnSalvar) btnSalvar.disabled = !v;
+  }
+
+  if(e.target.id === 'codigoCtr') e.target.value = e.target.value.replace(/\D/g, "");
+});
+
+function abrirSenha(){ document.getElementById("modalSenha").style.display="flex"; }
+function fecharSenha(){ document.getElementById("modalSenha").style.display="none"; }
+
+async function carregarLista() {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const isAdmin = (user.parceiro.toString() === "97");
+  
+  const fAdmin = document.getElementById("filtrosAdmin");
+  if(fAdmin) {
+    fAdmin.style.display = "flex";
+    fAdmin.style.flexDirection = "row";
+    fAdmin.style.flexWrap = "wrap";
+    fAdmin.style.gap = "5px";
+    fAdmin.style.alignItems = "center";
+    fAdmin.style.padding = "10px";
+    fAdmin.style.background = "#0f172a";
+    fAdmin.style.borderRadius = "8px";
+    fAdmin.style.marginBottom = "10px";
+    
+    if(!document.getElementById("fLote")){
+       const inputLote = document.createElement("input");
+       inputLote.id = "fLote";
+       inputLote.placeholder = "LOTE";
+       inputLote.onkeyup = filtrarTabelaAvancado;
+       inputLote.style.width = "70px";
+       fAdmin.appendChild(inputLote);
+    }
+
+    const inputsFiltro = fAdmin.querySelectorAll("input, select");
+    inputsFiltro.forEach(el => {
+       el.style.width = el.id === "fNome" ? "200px" : el.id === "fLote" ? "70px" : "auto";
+       el.style.padding = "5px";
+       el.style.fontSize = "12px";
+       el.style.border = "1px solid #334155";
+       el.style.borderRadius = "4px";
+       el.style.background = "#1e293b";
+       el.style.color = "white";
+    });
+  }
+  
+  const cabecalho = document.getElementById("cabecalhoTabela");
+  const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "AÇÕES"];
+  
+  cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
+
+  if(!document.getElementById("containerChecks")){
+    const divChecks = document.createElement("div");
+    divChecks.id = "containerChecks";
+    divChecks.style = "display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px; font-size:11px; color:#22c55e; border:1px solid #334155;";
+    divChecks.innerHTML = "<div style='width:100%; color:white; font-weight:bold; margin-bottom:5px;'>Exibir/Ocultar Colunas:</div>";
+    colNames.forEach((name, idx) => {
+      divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
+    });
+    
+    divChecks.innerHTML += `<button onclick="fecharLotePorParceiro()" style="margin-left:auto; background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">FECHAR LOTE</button>`;
+    
+    document.getElementById("listasBox").prepend(divChecks);
+  }
+
+  const tbody = document.getElementById("corpoTabelaListas");
+  tbody.innerHTML = "<tr><td colspan='17'>Carregando dados...</td></tr>";
+  
+  try {
+    const dados = await chamarAPI({ acao: "obterListaCadastros", parceiro: user.parceiro });
+    tbody.innerHTML = "";
+    
+    dados.forEach(item => {
+      let valDataStatus = "";
+      for (let key in item) {
+        let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+        if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
+      }
+      
+      let valTel = "";
+      for (let key in item) {
+        let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+        if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
+      }
+
+      tbody.innerHTML += `<tr>
+        <td class="col-0">${item.id || ''}</td>
+        <td class="col-1">${item.cpf || ''}</td>
+        <td class="col-2">${item.nome || ''}</td>
+        <td class="col-3">${item.nasc || ''}</td>
+        <td class="col-4">${item.municipio || ''}</td>
+        <td class="col-5">${valTel}</td>
+        <td class="col-6">${item.via || ''}</td>
+        <td class="col-7">${item.parceiro || ''}</td>
+        <td class="col-8">${item.data || ''}</td>
+        <td class="col-9">${item.atendente || ''}</td>
+        <td class="col-10">${item.boleto || ''}</td>
+        <td class="col-11"><b>${item.status || ''}</b></td>
+        <td class="col-12">${item.motivo || ''}</td>
+        <td class="col-13">${valDataStatus}</td>
+        <td class="col-14">${item.carteira || ''}</td>
+        <td class="col-15">${item.lote || ''}</td>
+        <td class="col-16">
+          <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+        </td>
+      </tr>`;
+    });
+    
+    const checks = document.getElementById("containerChecks").querySelectorAll("input");
+    checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
+  } catch (err) {
+    tbody.innerHTML = "<tr><td colspan='17'>Erro ao carregar lista.</td></tr>";
+  }
+}
+
+function alternarColuna(idx) { aplicarOcultacao(idx, event.target.checked); }
+function aplicarOcultacao(idx, exibir) {
+  document.querySelectorAll(`.col-${idx}`).forEach(c => c.style.display = exibir ? "" : "none");
+}
+
+async function fecharLotePorParceiro() {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  if(!confirm("Deseja fechar o lote atual para o parceiro " + user.parceiro + "?")) return;
+  
+  try {
+    const res = await chamarAPI({ acao: "fecharLoteAppsScript", parceiro: user.parceiro });
+    if(res.sucesso) {
+      alert("Lote fechado com sucesso! Lote: " + res.loteGerado);
+      carregarLista();
+    } else {
+      alert("Erro ao fechar lote: " + res.erro);
+    }
+  } catch (err) {
+    alert("Erro de conexão ao fechar lote.");
+  }
+}
+
+async function salvarEntrega() {
+  const ctr = document.getElementById("codigoCtr").value;
+  const isTerceiro = document.getElementById("checkTerceiro").checked;
+  
+  if(!alunoEncontradoGlobal) { 
+    alert("Informe um CTR válido e aguarde a busca."); 
+    return; 
+  }
+  
+  const nomeRecebedor = isTerceiro ? document.getElementById("nomeTerceiro").value : alunoEncontradoGlobal.nome;
+  const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
+  const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
+  const via = document.querySelector('input[name="viaEntrega"]:checked').value;
+
+  if(isTerceiro && (!nomeRecebedor || !cpfRecebedor || !vinculo)) { 
+    alert("Preencha todos os campos do recebedor!"); 
+    return; 
+  }
+
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+
+  try {
+    const res = await chamarAPI({
+      acao: "registrarEntregaAppsScript",
+      ctr: ctr,
+      cpfA: alunoEncontradoGlobal.cpf,
+      nomeA: alunoEncontradoGlobal.nome,
+      cpfR: cpfRecebedor,
+      nomeR: nomeRecebedor,
+      vinculo: vinculo,
+      atendente: user.nome,
+      parceiro: user.parceiro,
+      via: via
+    });
+
+    if(res.sucesso) {
+      imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
+      alert("Entrega realizada com sucesso!");
+
+      document.getElementById("codigoCtr").value = "";
+      document.getElementById("infoAlunoEntrega").style.display = "none";
+      if(isTerceiro) {
+        document.getElementById("nomeTerceiro").value = "";
+        document.getElementById("cpfTerceiro").value = "";
+        document.getElementById("parentesco").value = "";
+        document.getElementById("checkTerceiro").checked = false;
+        if(typeof toggleTerceiro === "function") toggleTerceiro();
+      }
+      document.getElementById("via1").checked = true;
+      alunoEncontradoGlobal = null;
+    } else {
+      alert("Erro ao salvar: " + res.erro);
+    }
+  } catch (err) {
+    alert("Erro de conexão ao registrar entrega.");
+  }
+}
+
+document.addEventListener('blur', async function(e){
+  if(e.target.id === "codigoCtr"){
+    const ctr = e.target.value.trim();
+    if(!ctr) return;
+
+    const userStr = sessionStorage.getItem("usuario");
+    if(!userStr) return;
+    const user = JSON.parse(userStr);
+
+    try {
+      const aluno = await chamarAPI({ 
+        acao: "buscarPorCodigoAppsScript", 
+        ctr: ctr, 
+        parceiro: user.parceiro 
+      });
+      
+      if(aluno && aluno.encontrado) {
+        alunoEncontradoGlobal = aluno;
+        document.getElementById("resNomeAluno").innerText = aluno.nome;
+        document.getElementById("resCpfAluno").innerText = aluno.cpf; 
+        document.getElementById("infoAlunoEntrega").style.display = "block";
+        if(aluno.via) {
+          const viaRadio = document.getElementById("via" + aluno.via);
+          if(viaRadio) viaRadio.checked = true;
+        }
+      } else {
+        document.getElementById("infoAlunoEntrega").style.display = "none";
+        alunoEncontradoGlobal = null;
+      }
+    } catch (err) {
+      console.error("Erro na busca por CTR:", err);
+    }
+  }
+}, true);
+
+function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
+  const telaPrint = window.open('', '_blank');
+  const dataHora = new Date().toLocaleString('pt-BR');
+
+  telaPrint.document.write(`
+    <html>
+    <head>
+      <title>Entrega CTR ${ctr}</title>
+      <style>
+        @page { size: A5 landscape; margin: 0; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 7mm; box-sizing: border-box; width: 210mm; height: 148mm; display: flex; justify-content: center; align-items: center; }
+        .ticket { width: 100%; height: 100%; border: 2px solid #000; padding: 6mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
+        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 2mm; }
+        .header h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
+        .section-title { font-size: 13px; font-weight: bold; background: #f2f2f2; padding: 1.5mm 3mm; border: 1px solid #000; margin-top: 2mm; }
+        .info-group { display: flex; width: 100%; font-size: 14px; margin: 1.5mm 0; }
+        .info-item { flex: 1; line-height: 1.4; }
+        .declaracao { font-size: 13px; line-height: 1.5; text-align: justify; border: 1px dashed #000; padding: 4mm; margin: 3mm 0; }
+        .assinatura-area { text-align: center; margin-top: 2mm; }
+        .assinatura-linha { border-top: 1.5px solid #000; width: 60%; margin: 0 auto; }
+        .assinatura-texto { font-size: 11px; margin-top: 1mm; font-weight: bold; text-transform: uppercase; }
+        .meta-info { display: flex; justify-content: space-between; font-size: 10px; border-top: 1px solid #eee; padding-top: 1mm; }
+        b { text-transform: uppercase; }
+      </style>
+    </head>
+    <body>
+      <div class="ticket">
+        <div class="header"><h2>COMPROVANTE DE ENTREGA</h2></div>
+        <div>
+          <div class="section-title">DADOS DO ALUNO</div>
+          <div class="info-group">
+            <div class="info-item"><b>CTR:</b> ${ctr}</div>
+            <div class="info-item"><b>VIA:</b> ${via}ª VIA</div>
+            <div class="info-item"><b>ALUNO:</b> ${aluno}</div>
+          </div>
+          <div class="info-group" style="margin-top: -1mm;"><div class="info-item"><b>CPF ALUNO:</b> ${cpfA}</div></div>
+        </div>
+        <div class="declaracao">Declaro que recebi, nesta data, a Carteira de Estudante Macrorregião 2026...</div>
+        <div>
+          <div class="section-title">DADOS DO RECEBEDOR</div>
+          <div class="info-group">
+            <div class="info-item"><b>NOME:</b> ${recebedor}</div>
+            <div class="info-item"><b>CPF:</b> ${cpfR}</div>
+          </div>
+          <div class="info-group" style="margin-top: -1mm;"><div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div></div>
+        </div>
+        <div class="assinatura-area"><div class="assinatura-linha"></div><div class="assinatura-texto">Assinatura do Recebedor</div></div>
+        <div class="meta-info"><span><b>ATENDENTE:</b> ${atendente}</span><span><b>DATA/HORA:</b> ${dataHora}</span></div>
+      </div>
+      <script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>
+    </body>
+    </html>
+  `);
+  telaPrint.document.close();
+}
+
+function abrirAdmin() {
+  var urlLotes = "https://script.google.com/macros/s/AKfycbxXBQmEu_d-jUL08Vi9Cvd-h0PPnl4XLPSocuMJmBBndADfui3qj6EpG91NXOmeuXSO/exec";
+  var token = "MACRO@MACRO";
+  var u = ""; var s = "";
+  try {
+    var uField = document.getElementById('userLogin');
+    var sField = document.getElementById('passLogin');
+    if (uField) u = uField.value;
+    if (sField) s = sField.value;
+  } catch (e) {}
+  var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
+  window.open(linkFinal, '_blank');
+}
+
+function mascaraData(campo) {
+  var v = campo.value.replace(/\D/g, "");
+  if (v.length >= 2) v = v.substring(0, 2) + "/" + v.substring(2);
+  if (v.length >= 5) v = v.substring(0, 5) + "/" + v.substring(5, 9);
+  campo.value = v;
+}
+</script>
+</body>
+</html>
