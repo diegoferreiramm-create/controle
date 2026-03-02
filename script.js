@@ -8,32 +8,20 @@ let alunoEncontradoGlobal = null;
 
 // --- FUNÇÃO AUXILIAR PARA CHAMADAS API ---
 async function chamarAPI(params) {
-  // Aqui usamos a SCRIPT_URL que foi definida lá no topo
   const query = new URLSearchParams(params).toString();
   const urlFinal = `${SCRIPT_URL}?${query}`;
 
   try {
-    const response = await fetch(urlFinal, {
-      method: "GET", 
-      mode: "cors",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error("Erro na rede: " + response.status);
-    }
-
-    return await response.json();
+    const response = await fetch(urlFinal);
+    // Se o Google não responder 200 OK, ele pula para o catch
+    if (!response.ok) throw new Error("Erro na rede");
     
+    return await response.json(); 
   } catch (error) {
-    console.error("Erro na conexão com o Apps Script:", error);
-    throw error; // Repassa o erro para o catch do salvarCadastro
+    console.error("Erro na API:", error);
+    throw error; 
   }
 }
-
-
 
 function abrirTela(id){
   const telas = ["loginBox","menuBox","cadastrarBox","pesquisarBox","entregarBox","listasBox", "logBox", "recebimentoLoteBox", "corrigirBox"];   
@@ -424,18 +412,18 @@ async function salvarCadastro(){
 
     } else {
       // PREPARAÇÃO DOS PARÂMETROS PARA NOVO CADASTRO
-      const params = new URLSearchParams({
-        acao: "salvarCadastroAppsScript",
-        cpf: cpf,
-        nome: nome,
-        nasc: nascFormatado,
-        municipio: mun,
-        tel: tel,
-        via: via,
-        parceiro: user.parceiro,
-        atendente: user.nome,
-        boleto: boleto
-      });
+      const res = await chamarAPI({
+      acao: "salvarCadastroAppsScript",
+      cpf: cpf,
+      nome: nome,
+      nasc: nascFormatado,
+      municipio: mun,  // <-- Aqui: o .gs quer 'municipio', seu código tem 'mun'
+      tel: tel,
+      via: via,
+      parceiro: user.parceiro,
+      atendente: user.nome,
+      boleto: boleto
+    });
 
       const response = await fetch(`${urlWebApp}?${params.toString()}`);
       const res = await response.json();
