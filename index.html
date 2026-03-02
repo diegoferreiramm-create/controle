@@ -530,7 +530,14 @@ let alunoEncontradoGlobal = null;
 // FUNÇÃO AUXILIAR PARA CHAMADAS API (Substitui o google.script.run)
 async function chamarAPI(params) {
   const query = new URLSearchParams(params).toString();
-  const res = await fetch(`${SCRIPT_URL}?${query}`);
+  const url = `${SCRIPT_URL}?${query}`;
+  
+  // Adicionamos o modo 'cors' e redirecionamento automático
+  const res = await fetch(url, {
+    method: 'GET',
+    mode: 'cors',
+    redirect: 'follow'
+  });
   return await res.json();
 }
 
