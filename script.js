@@ -9,18 +9,9 @@ let alunoEncontradoGlobal = null;
 // --- FUNÇÃO AUXILIAR PARA CHAMADAS API ---
 async function chamarAPI(params) {
   const query = new URLSearchParams(params).toString();
-  const urlFinal = `${SCRIPT_URL}?${query}`;
-
-  try {
-    const response = await fetch(urlFinal);
-    // Se o Google não responder 200 OK, ele pula para o catch
-    if (!response.ok) throw new Error("Erro na rede");
-    
-    return await response.json(); 
-  } catch (error) {
-    console.error("Erro na API:", error);
-    throw error; 
-  }
+  // Chamada limpa, sem headers pesados para o Google não engasgar
+  const response = await fetch(`${SCRIPT_URL}?${query}`);
+  return response.json();
 }
 
 function abrirTela(id){
