@@ -529,18 +529,11 @@ let alunoEncontradoGlobal = null;
 
 // FUNÇÃO AUXILIAR PARA CHAMADAS API (Substitui o google.script.run)
 async function chamarAPI(params) {
-  const query = new URLSearchParams(params).toString();
-  const url = SCRIPT_URL + "?" + query;
-  
-  try {
+    const query = new URLSearchParams(params).toString();
+    const url = `${SCRIPT_URL}?${query}`;
     const res = await fetch(url);
-    const dados = await res.json();
-    return dados;
-  } catch (err) {
-    console.error("Erro na requisição:", err);
-    throw err;
+    return await res.json();
   }
-}
 
 //atribuições de abrir paginas//
 function abrirTela(id){
