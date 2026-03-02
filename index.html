@@ -574,25 +574,35 @@ function abrirTela(id){
 
 //ATRIBUIÇÃO LOGIN//
 async function entrar(){
-  const login = document.getElementById("login").value.trim();
-  const senha = document.getElementById("senha").value.trim();
+  const loginField = document.getElementById("login");
+  const senhaField = document.getElementById("senha");
   const msg = document.getElementById("msg");
+
+  // Verifica se os campos existem no seu HTML antes de continuar
+  if (!loginField || !senhaField) {
+    console.error("ERRO: IDs 'login' ou 'senha' não encontrados no seu HTML.");
+    return;
+  }
+
+  const login = loginField.value.trim();
+  const senha = senhaField.value.trim();
   
   try {
+    msg.innerText = "Verificando...";
     const res = await chamarAPI({ acao: "validarLogin", u: login, s: senha });
+    
     if(res.sucesso){
-      // CORREÇÃO: Salvando res.dados para que as outras funções achem o nome/parceiro
+      // No Apps Script você salvava 'res', aqui salvamos 'res.dados'
       sessionStorage.setItem("usuario", JSON.stringify(res.dados));
-      mostrarMenu();
+      mostrarMenu(); 
     } else { 
-      msg.innerText="Login inválido"; 
+      msg.innerText = "Login ou senha inválidos"; 
     }
   } catch (err) {
-    console.error("Erro no login:", err);
+    console.error("Erro na conexão:", err);
     msg.innerText = "Erro de conexão com o servidor.";
   }
 }
-
 /**
  * MAPEAMENTO RÍGIDO - AJUSTADO
  */
