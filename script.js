@@ -5,13 +5,28 @@ let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
 
-// FUNÇÃO AUXILIAR PARA CHAMADAS API
+// FUNÇÃO AUXILIAR PARA CHAMADAS API (VERSÃO GITHUB CORRIGIDA)
 async function chamarAPI(params) {
-  const query = new URLSearchParams(params).toString();
-  const res = await fetch(`${SCRIPT_URL}?${query}`);
-  return await res.json();
-}
+  // Certifique-se que a SCRIPT_URL esteja definida no topo do seu script.js
+  const urlWebApp = SCRIPT_URL; 
 
+  // Transforma o objeto de parâmetros em uma linha de texto para a URL
+  const query = new URLSearchParams(params).toString();
+  const urlFinal = urlWebApp + "?" + query;
+
+  try {
+    const response = await fetch(urlFinal);
+    
+    if (!response.ok) {
+      throw new Error("Erro na rede ou URL incorreta: " + response.status);
+    }
+
+    return await response.json();
+  } catch (erro) {
+    console.error("Falha na chamada API:", erro);
+    throw erro; // Repassa o erro para o 'catch' da função que chamou (ex: salvarCadastro)
+  }
+}
 function abrirTela(id){
   const telas = ["loginBox","menuBox","cadastrarBox","pesquisarBox","entregarBox","listasBox", "logBox", "recebimentoLoteBox", "corrigirBox"];   
   
@@ -342,6 +357,100 @@ function prepararEdicao(item) {
 }
 
 async function salvarCadastro(){
+  const userStr = sessionStorage.getItem("usuario");
+  if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
+  const user = JSON.parse(userStr);
+  const cpf = document.getElementById("cpf").value;
+  const nome = document.getElementById("nome").value;
+  const nascRaw = document.getElementById("nascimento").value;
+  const mun = document.getElementById("municipio").value;
+  const tel = document.getElementById("telefone").value;
+  
+  const viaEl = document.querySelector('input[name="via"]:checked');
+  const via = viaEl ? viaEl.value : "1ª VIA";
+  
+  const boleto = document.getElementById("codigoBoleto").value.trim();
+
+  if(!cpf || !nome || !nascRaw || !boleto) { 
+    alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
+    return; 
+  }
+
+  const partes = nascRaw.split("-");
+  const nascFormatado = `${partes[2]}/${partes[1]}/${partes[0]}`;
+  const btn = document.getElementById("btnSalvar");
+  btn.innerText = "Processando...";
+  btn.disabled = true;
+
+  // --- CONFIGURAÇÃO DA URL (COLOQUE A SUA URL AQUI) ---
+  const urlWebApp = "SUA_URL_DO_WEB_APP_AQUI"; 
+
+  try {
+    if (modoEdicao) {
+      // PREPARAÇÃO DOS PARÂMETROS PARA EDIÇÃO
+      const params = new URLSearchParams({
+        acao: "editarCadastroAppsScript",
+        id: idSendoEditado,
+        cpf: cpf,
+        nome: nome,
+        nasc: nascFormatado,
+        municipio: mun,
+        tel: tel,
+        via: via,
+        atendente: user.nome,
+        parceiro: user.parceiro,
+        boleto: boleto
+      });
+
+      const response = await fetch(`${urlWebApp}?${params.toString()}`);
+      const res = await response.json();
+
+      if(res.sucesso) {
+        ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = "";
+        });
+        document.getElementById("msgCPF").innerText = "";
+        abrirTela('listasBox');
+      } else { alert("Erro ao editar: " + res.erro); }
+
+    } else {
+      // PREPARAÇÃO DOS PARÂMETROS PARA NOVO CADASTRO
+      const params = new URLSearchParams({
+        acao: "salvarCadastroAppsScript",
+        cpf: cpf,
+        nome: nome,
+        nasc: nascFormatado,
+        municipio: mun,
+        tel: tel,
+        via: via,
+        parceiro: user.parceiro,
+        atendente: user.nome,
+        boleto: boleto
+      });
+
+      const response = await fetch(`${urlWebApp}?${params.toString()}`);
+      const res = await response.json();
+
+      if(res.sucesso){ 
+        imprimirProtocolo(res.id, cpf, nome, nascFormatado, mun, via, user.nome, user.parceiro, res.data, boleto);
+        ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.value = "";
+        });
+        document.getElementById("msgCPF").innerText = "";
+      } else { alert("Erro: " + res.erro); }
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erro de conexão com o servidor. Verifique a URL e a permissão 'Qualquer pessoa'.");
+  } finally {
+    btn.innerText = "Salvar e Gerar Protocolo";
+    btn.disabled = false;
+  }
+}
+
+} function salvarCadastro(){
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
   const user = JSON.parse(userStr);
