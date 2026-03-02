@@ -6,27 +6,31 @@ let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
 
 // FUNÇÃO AUXILIAR PARA CHAMADAS API (VERSÃO GITHUB CORRIGIDA)
+
 async function chamarAPI(params) {
-  // Certifique-se que a SCRIPT_URL esteja definida no topo do seu script.js
-  const urlWebApp = SCRIPT_URL; 
-
-  // Transforma o objeto de parâmetros em uma linha de texto para a URL
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
+  
   const query = new URLSearchParams(params).toString();
-  const urlFinal = urlWebApp + "?" + query;
+  const urlFinal = `${SCRIPT_URL}?${query}`;
 
-  try {
-    const response = await fetch(urlFinal);
-    
-    if (!response.ok) {
-      throw new Error("Erro na rede ou URL incorreta: " + response.status);
+  // O Google Apps Script exige que a chamada seja simples para evitar erro de CORS
+  const response = await fetch(urlFinal, {
+    method: "GET", // Sempre use GET para evitar bloqueio de CORS do Google
+    mode: "cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
     }
+  });
 
-    return await response.json();
-  } catch (erro) {
-    console.error("Falha na chamada API:", erro);
-    throw erro; // Repassa o erro para o 'catch' da função que chamou (ex: salvarCadastro)
+  if (!response.ok) {
+    throw new Error("Erro na rede: " + response.status);
   }
+
+  return await response.json();
 }
+
+
+
 function abrirTela(id){
   const telas = ["loginBox","menuBox","cadastrarBox","pesquisarBox","entregarBox","listasBox", "logBox", "recebimentoLoteBox", "corrigirBox"];   
   
