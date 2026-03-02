@@ -1,32 +1,36 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTT6vZYmU4Dnc-6YI9XJM1-p19mv6TcPXj56dhI8tBVQrNBIBa7PAnR7S4mbPDnmyiTQ/exec";
+// 1. Defina a URL correta APENAS UMA VEZ no topo do arquivo
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
 
 // --- VARIÁVEIS GLOBAIS DE CONTROLE ---
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
 
-// FUNÇÃO AUXILIAR PARA CHAMADAS API (VERSÃO GITHUB CORRIGIDA)
-
+// --- FUNÇÃO AUXILIAR PARA CHAMADAS API ---
 async function chamarAPI(params) {
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
-  
+  // Aqui usamos a SCRIPT_URL que foi definida lá no topo
   const query = new URLSearchParams(params).toString();
   const urlFinal = `${SCRIPT_URL}?${query}`;
 
-  // O Google Apps Script exige que a chamada seja simples para evitar erro de CORS
-  const response = await fetch(urlFinal, {
-    method: "GET", // Sempre use GET para evitar bloqueio de CORS do Google
-    mode: "cors",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
+  try {
+    const response = await fetch(urlFinal, {
+      method: "GET", 
+      mode: "cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro na rede: " + response.status);
     }
-  });
 
-  if (!response.ok) {
-    throw new Error("Erro na rede: " + response.status);
+    return await response.json();
+    
+  } catch (error) {
+    console.error("Erro na conexão com o Apps Script:", error);
+    throw error; // Repassa o erro para o catch do salvarCadastro
   }
-
-  return await response.json();
 }
 
 
