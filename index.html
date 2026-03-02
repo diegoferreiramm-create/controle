@@ -520,9 +520,8 @@ button:hover{ background:#16a34a; }
 
 
 <script>
- const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTT6vZYmU4Dnc-6YI9XJM1-p19mv6TcPXj56dhI8tBVQrNBIBa7PAnR7S4mbPDnmyiTQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTT6vZYmU4Dnc-6YI9XJM1-p19mv6TcPXj56dhI8tBVQrNBIBa7PAnR7S4mbPDnmyiTQ/exec";
 
-  
 // --- VARIÁVEIS GLOBAIS DE CONTROLE ---
 let modoEdicao = false;
 let idSendoEditado = null;
@@ -575,7 +574,8 @@ async function entrar(){
   try {
     const res = await chamarAPI({ acao: "validarLogin", u: login, s: senha });
     if(res.sucesso){
-      sessionStorage.setItem("usuario", JSON.stringify(res));
+      // CORREÇÃO: Salvando res.dados para que as outras funções achem o nome/parceiro
+      sessionStorage.setItem("usuario", JSON.stringify(res.dados));
       mostrarMenu();
     } else { 
       msg.innerText="Login inválido"; 
@@ -794,8 +794,9 @@ document.addEventListener('blur', async function(e) {
 
 
 function mostrarMenu(){
-  const user = JSON.parse(sessionStorage.getItem("usuario"));
-  if(!user) return;
+  const sessao = sessionStorage.getItem("usuario");
+  if(!sessao) return;
+  const user = JSON.parse(sessao);
   
   document.getElementById("infoUsuario").innerText = user.nome + " | " + user.parceiro;
   document.getElementById("hudUsuario").style.display="flex";
@@ -866,7 +867,7 @@ function prepararEdicao(item) {
   
   const campoBoleto = document.getElementById("codigoBoleto");
   if(campoBoleto) {
-     campoBoleto.value = item.boleto || "";
+      campoBoleto.value = item.boleto || "";
   }
   
   document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
@@ -1009,10 +1010,8 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   telaPrint.document.close();
 }
 
-
-<script>
 /**
- * TERCEIRA PARTE: GESTÃO DE SENHAS, BUSCAS, LISTAGEM E ENTREGAS
+ * GESTÃO DE SENHAS, BUSCAS, LISTAGEM E ENTREGAS
  */
 
 async function salvarSenha() {
@@ -1214,6 +1213,7 @@ async function carregarLista() {
     tbody.innerHTML = "<tr><td colspan='17'>Erro ao carregar lista.</td></tr>";
   }
 }
+</script>
 
 function alternarColuna(idx) { aplicarOcultacao(idx, event.target.checked); }
 function aplicarOcultacao(idx, exibir) {
