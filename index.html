@@ -809,10 +809,18 @@ function mostrarMenu(){
   if(!sessao) return;
   const user = JSON.parse(sessao);
   
-  document.getElementById("infoUsuario").innerText = user.nome + " | " + user.parceiro;
-  document.getElementById("hudUsuario").style.display="flex";
+  // Usamos || "" para o código não travar se o nome ou parceiro vierem nulos
+  const nomeExibir = user.nome || "Usuário";
+  const parceiroExibir = user.parceiro || "";
 
-  if(user.nome === 'admin' || user.parceiro.toString() === "97") {
+  const infoUserEl = document.getElementById("infoUsuario");
+  if(infoUserEl) infoUserEl.innerText = nomeExibir + " | " + parceiroExibir;
+  
+  const hudEl = document.getElementById("hudUsuario");
+  if(hudEl) hudEl.style.display = "flex";
+
+  // Verificação de Admin/Parceiro 97
+  if(user.nome === 'admin' || (user.parceiro && user.parceiro.toString() === "97")) {
     const cardLog = document.getElementById("cardLog");
     if(cardLog) cardLog.style.display = "block";
   }
